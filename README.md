@@ -1,4 +1,4 @@
-# (WIP) MLOps on Vertex AI
+# MLOps with Vertex AI
 
 This example implements the end-to-end [MLOps process](https://services.google.com/fh/files/misc/practitioners_guide_to_mlops_whitepaper.pdf) using [Vertex AI](https://cloud.google.com/vertex-ai) platform and [Smart Analytics](https://cloud.google.com/solutions/smart-analytics) technology capabilities. The example use [Keras](https://keras.io/) to implement the ML model, [TFX](https://www.tensorflow.org/tfx) to implement the training pipeline, and [Model Builder SDK](https://github.com/googleapis/python-aiplatform/tree/569d4cd03e888fde0171f7b0060695a14f99b072/google/cloud/aiplatform) to interact with Vertex AI.
 
@@ -13,8 +13,8 @@ This example implements the end-to-end [MLOps process](https://services.google.c
 3. Open the JupyterLab then open a new Terminal
 4. Clone the repository to your AI Notebook instance:
     ```
-    git clone https://github.com/ksalama/ucaip-labs.git
-    cd ucaip-labs
+    git clone https://github.com/GoogleCloudPlatform/mlops-with-vertex-ai.git
+    cd mlops-with-vertex-ai
     ```
 5. Install the required Python packages:
     ```
@@ -46,13 +46,13 @@ We experiment with creating a [Custom Model](https://cloud.google.com/ai-platfor
 2. Implementing a `Keras` classification model.
 3. Training the `Keras` model with `Vertex AI` using a [pre-built container](https://cloud.google.com/ai-platform-unified/docs/training/pre-built-containers).
 4. Upload the exported model from `Cloud Storage` to `Vertex AI`.
-5. Exract and visualize experiment parameters from [Vertex AI Metadata](https://cloud.google.com/vertex-ai/docs/ml-metadata/introduction).
+5. Extract and visualize experiment parameters from [Vertex AI Metadata](https://cloud.google.com/vertex-ai/docs/ml-metadata/introduction).
 
 We use [Vertex TensorBoard](https://cloud.google.com/vertex-ai/docs/experiments/tensorboard-overview) 
 and [Vertex ML Metadata](https://cloud.google.com/vertex-ai/docs/ml-metadata/introduction) to  track, visualize, and compare ML experiments.
 
 In addition, the training steps are formalized by implementing a [TFX pipeline](https://www.tensorflow.org/tfx).
-The [03-training-formalization](02-tfx-interactive.ipynb) notebook covers implementing and testing the pipeline components interactively.
+The [03-training-formalization](03-training-formalization.ipynb) notebook covers implementing and testing the pipeline components interactively.
 
 ## Training Operationalization
 
@@ -80,7 +80,7 @@ The [05-continuous-training](05-continuous-training.ipynb) notebook covers:
 
 The end-to-end TFX training pipeline implementation is in the [src/pipelines](src/tfx_pipelines) directory, which covers the following steps:
 
-1. Receive hyperparameters using `hyperparam_gen` custom python component.
+1. Receive hyper-parameters using `hyperparam_gen` custom python component.
 2. Extract data from `BigQuery` using `BigQueryExampleGen` component.
 3. Validate the raw data using `StatisticsGen` and `ExampleValidator` component.
 4. Process the data using on `Dataflow` `Transform` component.
@@ -106,7 +106,7 @@ We serve the deployed model for prediction.
 The [07-prediction-serving](07-prediction-serving.ipynb) notebook covers:
 
 1. Use the `Vertex AI` endpoint for online prediction.
-2. Use the `Vertex AI` uploaded model for batch prediciton.
+2. Use the `Vertex AI` uploaded model for batch prediction.
 3. Run the batch prediction using `Vertex Pipelines`.
 
 ## Model Monitoring

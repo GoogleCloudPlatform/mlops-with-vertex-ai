@@ -46,7 +46,7 @@ steps:
           '--project', '$_PROJECT',
           '--region', '$_REGION',
           '--endpoint-display-name', '$_ENDPOINT_DISPLAY_NAME']
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   id: 'Create Endpoint'
   waitFor: ['Test Model Artifact']
   

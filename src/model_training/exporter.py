@@ -96,5 +96,5 @@ def export_serving_model(
     }
 
     logging.info("Model export started...")
-    tf.saved_model.save(classifier, serving_model_dir, signatures=signatures)
+    classifier.save(serving_model_dir, signatures=signatures)
     logging.info("Model export completed.")

@@ -68,8 +68,8 @@ AI_PLATFORM_TRAINING_ARGS = {
 }
 
 
-SERVING_RUNTIME = os.getenv("SERVING_RUNTIME", "tf2-cpu.2-4")
-SERVING_IMAGE_URI = f"gcr.io/cloud-aiplatform/prediction/{SERVING_RUNTIME}:latest"
+SERVING_RUNTIME = os.getenv("SERVING_RUNTIME", "tf2-cpu.2-5")
+SERVING_IMAGE_URI = f"us-docker.pkg.dev/vertex-ai/prediction/{SERVING_RUNTIME}:latest"
 
 BATCH_PREDICTION_BQ_DATASET_NAME = os.getenv(
     "BATCH_PREDICTION_BQ_DATASET_NAME", "playground_us"

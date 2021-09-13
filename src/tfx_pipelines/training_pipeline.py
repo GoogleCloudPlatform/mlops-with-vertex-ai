@@ -21,7 +21,7 @@ import json
 import tensorflow_model_analysis as tfma
 
 import tfx
-from tfx.proto import example_gen_pb2, transform_pb2, trainer_pb2
+from tfx.proto import example_gen_pb2, transform_pb2
 from tfx.orchestration import pipeline, data_types
 from tfx.dsl.components.base import executor_spec
 from tfx.components.trainer import executor as trainer_executor
@@ -143,20 +143,20 @@ def create_pipeline(
     ).with_id("SchemaImporter")
 
     # Statistics generation.
-    statistics_gen = StatisticsGen(examples=train_example_gen.outputs.examples).with_id(
+    statistics_gen = StatisticsGen(examples=train_example_gen.outputs["examples"]).with_id(
         "StatisticsGen"
     )
 
     # Example validation.
     example_validator = ExampleValidator(
-        statistics=statistics_gen.outputs.statistics,
-        schema=schema_importer.outputs.result,
+        statistics=statistics_gen.outputs["statistics"],
+        schema=schema_importer.outputs["result"],
     ).with_id("ExampleValidator")
 
     # Data transformation.
     transform = Transform(
-        examples=train_example_gen.outputs.examples,
-        schema=schema_importer.outputs.result,
+        examples=train_example_gen.outputs["examples"],
+        schema=schema_importer.outputs["result"],
         module_file=TRANSFORM_MODULE_FILE,
         splits_config=transform_pb2.SplitsConfig(
             analyze=["train"], transform=["train", "eval"]
@@ -178,13 +178,11 @@ def create_pipeline(
         if config.TRAINING_RUNNER == "local"
         else caip_executor_spec,
         module_file=TRAIN_MODULE_FILE,
-        transformed_examples=transform.outputs.transformed_examples,
-        schema=schema_importer.outputs.result,
-        # base_model=warmstart_model_resolver.outputs.latest_model,
-        transform_graph=transform.outputs.transform_graph,
-        train_args=trainer_pb2.TrainArgs(num_steps=0),
-        eval_args=trainer_pb2.EvalArgs(num_steps=None),
-        hyperparameters=hyperparams_gen.outputs.hyperparameters,
+        examples=transform.outputs["transformed_examples"],
+        schema=schema_importer.outputs["result"],
+        # base_model=warmstart_model_resolver.outputs["latest_model"],
+        transform_graph=transform.outputs["transform_graph"],
+        hyperparameters=hyperparams_gen.outputs["hyperparameters"],
     ).with_id("ModelTrainer")
 
     # Get the latest blessed model (baseline) for model validation.
@@ -233,12 +231,12 @@ def create_pipeline(
 
     # Model evaluation.
     evaluator = Evaluator(
-        examples=test_example_gen.outputs.examples,
+        examples=test_example_gen.outputs["examples"],
         example_splits=["test"],
-        model=trainer.outputs.model,
-        # baseline_model=baseline_model_resolver.outputs.model,
+        model=trainer.outputs["model"],
+        # baseline_model=baseline_model_resolver.outputs["model"],
         eval_config=eval_config,
-        schema=schema_importer.outputs.result,
+        schema=schema_importer.outputs["result"],
     ).with_id("ModelEvaluator")
 
     exported_model_location = os.path.join(
@@ -252,8 +250,8 @@ def create_pipeline(
 
     # Push custom model to model registry.
     pusher = Pusher(
-        model=trainer.outputs.model,
-        model_blessing=evaluator.outputs.blessing,
+        model=trainer.outputs["model"],
+        model_blessing=evaluator.outputs["blessing"],
         push_destination=push_destination,
     ).with_id("ModelPusher")
 

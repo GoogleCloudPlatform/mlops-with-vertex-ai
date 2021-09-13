@@ -1,4 +1,4 @@
-FROM gcr.io/tfx-oss-public/tfx:0.30.0
+FROM gcr.io/tfx-oss-public/tfx:1.2.0
 
 COPY requirements.txt requirements.txt
 

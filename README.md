@@ -18,8 +18,8 @@ This example implements the end-to-end [MLOps process](https://services.google.c
     ```
 5. Install the required Python packages:
     ```
-    pip install tfx==0.30.0 --user
-    pip install -r requirements.txt --user
+    pip install tfx==1.2.0 --user
+    pip install -r requirements.txt
     ```
 6. Upgrade the `gcloud` components:
     ```

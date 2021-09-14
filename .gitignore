@@ -136,3 +136,4 @@ mlpipeline-ui-metadata.json
 *.csv
 *.sqllite
 model.png
+*-pipeline.json

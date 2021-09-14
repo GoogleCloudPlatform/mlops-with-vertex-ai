@@ -263,6 +263,7 @@ def create_pipeline(
         model_display_name=config.MODEL_DISPLAY_NAME,
         pushed_model_location=exported_model_location,
         serving_image_uri=config.SERVING_IMAGE_URI,
+        model_blessing=evaluator.outputs["blessing"],
         explanation_config=explanation_config,
     ).with_id("VertexUploader")
 

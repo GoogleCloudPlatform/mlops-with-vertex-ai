@@ -20,15 +20,17 @@ import json
 import logging
 import tensorflow as tf
 
+
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
+from tfx.components.util import model_utils
 from tfx.dsl.component.experimental.decorators import component
 from tfx.dsl.component.experimental.annotations import (
     InputArtifact,
     OutputArtifact,
     Parameter,
 )
-from tfx.types.standard_artifacts import HyperParameters
+from tfx.types.standard_artifacts import HyperParameters, ModelBlessing
 from tfx.types.experimental.simple_artifacts import File as UploadedModel
 from tfx.types.experimental.simple_artifacts import Dataset
 
@@ -78,10 +80,17 @@ def vertex_model_uploader(
     pushed_model_location: Parameter[str],
     serving_image_uri: Parameter[str],
     explanation_config: Parameter[str],
+    model_blessing: InputArtifact[ModelBlessing],
     uploaded_model: OutputArtifact[UploadedModel],
 ):
 
     vertex_ai.init(project=project, location=region)
+    
+    blessing = artifact_utils.get_single_instance([model_blessing])
+    if not model_utils.is_model_blessed(blessing):
+        logging.info(f"Model is not uploaded to Vertex AI because it was not blessed by the evaluator.")
+        uploaded_model.set_int_custom_property("uploaded", 0)
+        return
 
     pushed_model_dir = os.path.join(
         pushed_model_location, tf.io.gfile.listdir(pushed_model_location)[-1]
@@ -112,8 +121,9 @@ def vertex_model_uploader(
     )
 
     model_uri = vertex_model.gca_resource.name
-    logging.info(f"Model uploaded to AI Platform: {model_uri}")
+    logging.info(f"Model uploaded to Vertex AI: {model_uri}")
     uploaded_model.set_string_custom_property("model_uri", model_uri)
+    uploaded_model.set_int_custom_property("uploaded", 1)
 
 
 @component

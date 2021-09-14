@@ -180,7 +180,7 @@ def create_pipeline(
         module_file=TRAIN_MODULE_FILE,
         examples=transform.outputs["transformed_examples"],
         schema=schema_importer.outputs["result"],
-        # base_model=warmstart_model_resolver.outputs["latest_model"],
+        base_model=warmstart_model_resolver.outputs["latest_model"],
         transform_graph=transform.outputs["transform_graph"],
         hyperparameters=hyperparams_gen.outputs["hyperparameters"],
     ).with_id("ModelTrainer")
@@ -234,7 +234,7 @@ def create_pipeline(
         examples=test_example_gen.outputs["examples"],
         example_splits=["test"],
         model=trainer.outputs["model"],
-        # baseline_model=baseline_model_resolver.outputs["model"],
+        baseline_model=baseline_model_resolver.outputs["model"],
         eval_config=eval_config,
         schema=schema_importer.outputs["result"],
     ).with_id("ModelEvaluator")
@@ -274,9 +274,9 @@ def create_pipeline(
         schema_importer,
         example_validator,
         transform,
-        # warmstart_model_resolver,
+        warmstart_model_resolver,
         trainer,
-        # baseline_model_resolver,
+        baseline_model_resolver,
         evaluator,
         pusher,
     ]

@@ -26,7 +26,7 @@ You can customize your configuration using the following variables:
 |zone|Yes||GCP zone for the Notebook instance. The zone must be in the region defined in the `subnet_region` variable|
 |machine_type|No|n1-standard-4|Machine type of the  Notebook instance|
 |boot_disk_size|No|200GB|Size of the Notebook instance's boot disk|
-|image_family|No|tf-2-4-cpu|Image family for the Notebook instance|
+|image_family|No|base-cpu|Image family for the Notebook instance|
 |gpu_type|No|null|GPU type of the Notebook instance. By default, the Notebook instance will be provisioned without a GPU|
 |gpu_count|No|null|GPU count of the Notebook instance|
 |install_gpu_driver|No|false|Whether to install a GPU driver|

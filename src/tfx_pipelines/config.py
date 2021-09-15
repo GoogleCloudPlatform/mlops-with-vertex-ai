@@ -14,6 +14,7 @@
 """TFX pipeline configurations."""
 
 import os
+from tfx import v1 as tfx
 
 PROJECT = os.getenv("PROJECT", "ksalama-cloudml")
 REGION = os.getenv("REGION", "us-central1")
@@ -61,10 +62,25 @@ BEAM_DATAFLOW_PIPELINE_ARGS = [
 
 
 TRAINING_RUNNER = os.getenv("TRAINING_RUNNER", "local")
-AI_PLATFORM_TRAINING_ARGS = {
-    "project": PROJECT,
-    "region": REGION,
-    "masterConfig": {"imageUri": TFX_IMAGE_URI},
+VERTEX_TRAINING_ARGS = {
+    'project': PROJECT,
+    'worker_pool_specs': [{
+        'machine_spec': {
+            'machine_type': 'n1-standard-4',
+#             'accelerator_type': 'NVIDIA_TESLA_K80',
+#             'accelerator_count': 1
+        },
+        'replica_count': 1,
+        'container_spec': {
+            'image_uri': TFX_IMAGE_URI,
+        },
+    }],
+}
+VERTEX_TRAINING_CONFIG = {
+    tfx.extensions.google_cloud_ai_platform.ENABLE_UCAIP_KEY: True,
+    tfx.extensions.google_cloud_ai_platform.UCAIP_REGION_KEY: REGION,
+    tfx.extensions.google_cloud_ai_platform.TRAINING_ARGS_KEY: VERTEX_TRAINING_ARGS,
+    'use_gpu': False,
 }
 
 

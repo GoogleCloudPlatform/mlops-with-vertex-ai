@@ -20,18 +20,17 @@ import json
 
 import tensorflow_model_analysis as tfma
 
-import tfx
-from tfx.proto import example_gen_pb2, transform_pb2
+from ml_metadata.proto import metadata_store_pb2
+from tfx.proto import example_gen_pb2, transform_pb2, pusher_pb2
+from tfx.types import Channel, standard_artifacts
 from tfx.orchestration import pipeline, data_types
-from tfx.dsl.components.base import executor_spec
-from tfx.components.trainer import executor as trainer_executor
-from tfx.extensions.google_cloud_ai_platform.trainer import (
-    executor as ai_platform_trainer_executor,
-)
-from tfx.extensions.google_cloud_big_query.example_gen.component import (
-    BigQueryExampleGen,
-)
-from tfx.components import (
+from tfx.dsl.components.common.importer import Importer
+from tfx.dsl.components.common.resolver import Resolver
+from tfx.dsl.experimental import latest_artifacts_resolver
+from tfx.dsl.experimental import latest_blessed_model_resolver
+from tfx.v1.extensions.google_cloud_big_query import BigQueryExampleGen
+from tfx.v1.extensions.google_cloud_ai_platform import Trainer as VertexTrainer 
+from tfx.v1.components import (
     StatisticsGen,
     ExampleValidator,
     Transform,
@@ -39,12 +38,6 @@ from tfx.components import (
     Evaluator,
     Pusher,
 )
-from tfx.dsl.components.common.importer import Importer
-from tfx.dsl.components.common.resolver import Resolver
-from tfx.dsl.experimental import latest_artifacts_resolver
-from tfx.dsl.experimental import latest_blessed_model_resolver
-
-from ml_metadata.proto import metadata_store_pb2
 
 SCRIPT_DIR = os.path.dirname(
     os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__)))
@@ -68,14 +61,6 @@ def create_pipeline(
     hidden_units: data_types.RuntimeParameter,
     metadata_connection_config: metadata_store_pb2.ConnectionConfig = None,
 ):
-
-    local_executor_spec = executor_spec.ExecutorClassSpec(
-        trainer_executor.GenericExecutor
-    )
-
-    caip_executor_spec = executor_spec.ExecutorClassSpec(
-        ai_platform_trainer_executor.GenericExecutor
-    )
 
     # Hyperparameter generation.
     hyperparams_gen = custom_components.hyperparameters_gen(
@@ -139,7 +124,7 @@ def create_pipeline(
     # Schema importer.
     schema_importer = Importer(
         source_uri=RAW_SCHEMA_DIR,
-        artifact_type=tfx.types.standard_artifacts.Schema,
+        artifact_type=standard_artifacts.Schema,
     ).with_id("SchemaImporter")
 
     # Statistics generation.
@@ -169,14 +154,11 @@ def create_pipeline(
     # Get the latest model to warmstart
     warmstart_model_resolver = Resolver(
         strategy_class=latest_artifacts_resolver.LatestArtifactsResolver,
-        latest_model=tfx.types.Channel(type=tfx.types.standard_artifacts.Model),
+        latest_model=Channel(type=standard_artifacts.Model),
     ).with_id("WarmstartModelResolver")
 
     # Model training.
     trainer = Trainer(
-        custom_executor_spec=local_executor_spec
-        if config.TRAINING_RUNNER == "local"
-        else caip_executor_spec,
         module_file=TRAIN_MODULE_FILE,
         examples=transform.outputs["transformed_examples"],
         schema=schema_importer.outputs["result"],
@@ -184,14 +166,24 @@ def create_pipeline(
         transform_graph=transform.outputs["transform_graph"],
         hyperparameters=hyperparams_gen.outputs["hyperparameters"],
     ).with_id("ModelTrainer")
+    
+    if config.TRAINING_RUNNER == "vertex":
+        trainer = VertexTrainer(
+            module_file=TRAIN_MODULE_FILE,
+            examples=transform.outputs["transformed_examples"],
+            schema=schema_importer.outputs["result"],
+            base_model=warmstart_model_resolver.outputs["latest_model"],
+            transform_graph=transform.outputs["transform_graph"],
+            hyperparameters=hyperparams_gen.outputs["hyperparameters"],
+            custom_config=config.VERTEX_TRAINING_CONFIG
+        ).with_id("ModelTrainer")
+        
 
     # Get the latest blessed model (baseline) for model validation.
     baseline_model_resolver = Resolver(
         strategy_class=latest_blessed_model_resolver.LatestBlessedModelResolver,
-        model=tfx.types.Channel(type=tfx.types.standard_artifacts.Model),
-        model_blessing=tfx.types.Channel(
-            type=tfx.types.standard_artifacts.ModelBlessing
-        ),
+        model=Channel(type=standard_artifacts.Model),
+        model_blessing=Channel(type=standard_artifacts.ModelBlessing),
     ).with_id("BaselineModelResolver")
 
     # Prepare evaluation config.
@@ -242,8 +234,8 @@ def create_pipeline(
     exported_model_location = os.path.join(
         config.MODEL_REGISTRY_URI, config.MODEL_DISPLAY_NAME
     )
-    push_destination = tfx.proto.pusher_pb2.PushDestination(
-        filesystem=tfx.proto.pusher_pb2.PushDestination.Filesystem(
+    push_destination = pusher_pb2.PushDestination(
+        filesystem=pusher_pb2.PushDestination.Filesystem(
             base_directory=exported_model_location
         )
     )

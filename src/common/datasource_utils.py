@@ -50,7 +50,8 @@ def _get_source_query(bq_dataset_name, bq_table_name, ml_use, limit=None):
 def get_training_source_query(
     project, region, dataset_display_name, ml_use, limit=None
 ):
-
+    vertex_ai.init(project=project, location=region)
+    
     dataset = vertex_ai.TabularDataset.list(
         filter=f"display_name={dataset_display_name}", order_by="update_time"
     )[-1]

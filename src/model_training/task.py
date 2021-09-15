@@ -22,7 +22,6 @@ from tensorflow.python.client import device_lib
 import argparse
 
 from google.cloud import aiplatform as vertex_ai
-from google.cloud import aiplatform_v1beta1 as vertex_ai_beta
 
 from src.model_training import defaults, trainer, exporter
 

@@ -14,11 +14,8 @@
 """Test model functions."""
 
 import sys
-import os
 import logging
-import tensorflow_transform as tft
 import tensorflow as tf
-from tensorflow.io import FixedLenFeature
 
 from src.common import features
 from src.model_training import model, defaults

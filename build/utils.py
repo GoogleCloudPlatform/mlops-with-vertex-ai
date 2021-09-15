@@ -28,8 +28,6 @@ SCRIPT_DIR = os.path.dirname(
 )
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, "..")))
 
-from google.cloud import storage
-
 SERVING_SPEC_FILEPATH = 'build/serving_resources_spec.json'
 
 def get_args():

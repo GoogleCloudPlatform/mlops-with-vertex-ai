@@ -60,7 +60,6 @@ BEAM_DATAFLOW_PIPELINE_ARGS = [
     f"--runner={BEAM_RUNNER}",
 ]
 
-
 TRAINING_RUNNER = os.getenv("TRAINING_RUNNER", "local")
 VERTEX_TRAINING_ARGS = {
     'project': PROJECT,
@@ -82,7 +81,6 @@ VERTEX_TRAINING_CONFIG = {
     tfx.extensions.google_cloud_ai_platform.TRAINING_ARGS_KEY: VERTEX_TRAINING_ARGS,
     'use_gpu': False,
 }
-
 
 SERVING_RUNTIME = os.getenv("SERVING_RUNTIME", "tf2-cpu.2-5")
 SERVING_IMAGE_URI = f"us-docker.pkg.dev/vertex-ai/prediction/{SERVING_RUNTIME}:latest"

@@ -143,6 +143,8 @@ def create_pipeline(
         examples=train_example_gen.outputs["examples"],
         schema=schema_importer.outputs["result"],
         module_file=TRANSFORM_MODULE_FILE,
+        # This is a temporary workaround to run on Dataflow.
+        force_tf_compat_v1=config.BEAM_RUNNER == "DataflowRunner",
         splits_config=transform_pb2.SplitsConfig(
             analyze=["train"], transform=["train", "eval"]
         ),

@@ -56,14 +56,14 @@ def create_pipeline(
         instances_format="jsonl",
         predictions_format="jsonl",
         job_resources=json.dumps(config.BATCH_PREDICTION_JOB_RESOURCES),
-        serving_dataset=bigquery_data_gen.outputs.serving_dataset,
+        serving_dataset=bigquery_data_gen.outputs["serving_dataset"],
     )
 
     datastore_prediction_writer = custom_components.datastore_prediction_writer(
         datastore_kind=config.DATASTORE_PREDICTION_KIND,
         predictions_format="jsonl",
         beam_args=json.dumps(config.BATCH_PREDICTION_BEAM_ARGS),
-        prediction_results=vertex_batch_prediction.outputs.prediction_results,
+        prediction_results=vertex_batch_prediction.outputs["prediction_results"],
     )
 
     pipeline_components = [

@@ -171,16 +171,21 @@ def vertex_batch_prediction(
 
     gcs_destination_prefix = artifact_utils.get_single_uri([prediction_results])
 
-    vertex_client = VertexClient(project, region)
     logging.info("Submitting Vertex AI batch prediction job...")
-    batch_prediction_job = vertex_client.submit_batch_prediction_job(
-        model_display_name=model_display_name,
-        gcs_source_pattern=gcs_source_pattern,
+
+    vertex_ai.init(project=project, location=region)
+    
+    batch_prediction_job = vertex_ai.BatchPredictionJob.create(
+        job_display_name=job_display_name,
+        model_name=model_display_name,
+        gcs_source=gcs_source_pattern,
         gcs_destination_prefix=gcs_destination_prefix,
         instances_format=instances_format,
         predictions_format=predictions_format,
-        other_configurations=job_resources,
+        sync=True,
+        **job_resources,
     )
+    
     logging.info("Batch prediction job completed.")
     prediction_results.set_string_custom_property(
         "batch_prediction_job", batch_prediction_job.gca_resource.name

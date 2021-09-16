@@ -31,7 +31,7 @@ steps:
 - name: '$_CICD_IMAGE_URI'
   entrypoint: 'pytest'
   args: ['src/tests/datasource_utils_tests.py', '-s']
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   env: 
   - 'PROJECT=$_PROJECT'  
   - 'BQ_LOCATION=$_BQ_LOCATION'
@@ -55,7 +55,7 @@ steps:
 - name: '$_CICD_IMAGE_URI'
   entrypoint: 'pytest'
   args: ['src/tests/pipeline_deployment_tests.py::test_e2e_pipeline', '-s']
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   env: 
   - 'PROJECT=$_PROJECT'  
   - 'REGION=$_REGION'
@@ -74,7 +74,7 @@ steps:
 # Build the image that encapsulates the pipeline.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', '$_TFX_IMAGE_URI', '.']
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   id: 'Build TFX Image'
   waitFor: ['Local Test E2E Pipeline']
   
@@ -86,7 +86,7 @@ steps:
           '--mode', 'compile-pipeline',
           '--pipeline-name', '$_PIPELINE_NAME'
           ]
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   env: 
   - 'PROJECT=$_PROJECT'  
   - 'REGION=$_REGION'
@@ -103,7 +103,7 @@ steps:
 # Upload compiled pipeline to GCS.
 - name: 'gcr.io/cloud-builders/gsutil'
   args: ['cp', '$_PIPELINE_NAME.json', '$_PIPELINES_STORE']
-  dir: 'ucaip-labs'
+  dir: 'mlops-with-vertex-ai'
   id:  'Upload Pipeline to GCS'
   waitFor: ['Compile Pipeline']
   

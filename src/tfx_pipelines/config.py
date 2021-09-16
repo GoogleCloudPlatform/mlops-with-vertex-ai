@@ -16,9 +16,9 @@
 import os
 from tfx import v1 as tfx
 
-PROJECT = os.getenv("PROJECT", "ksalama-cloudml")
-REGION = os.getenv("REGION", "us-central1")
-GCS_LOCATION = os.getenv("GCS_LOCATION", "gs://ksalama-cloudml-us/ucaip_demo/")
+PROJECT = os.getenv("PROJECT", "")
+REGION = os.getenv("REGION", "")
+GCS_LOCATION = os.getenv("GCS_LOCATION", "")
 
 ARTIFACT_STORE_URI = os.path.join(GCS_LOCATION, "tfx_artifacts")
 MODEL_REGISTRY_URI = os.getenv(

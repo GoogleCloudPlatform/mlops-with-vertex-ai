@@ -18,8 +18,8 @@ import sys
 import os
 import json
 import logging
+from datetime import datetime
 import tensorflow as tf
-
 
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
@@ -168,15 +168,14 @@ def vertex_batch_prediction(
         )
         + "*.jsonl"
     )
-
     gcs_destination_prefix = artifact_utils.get_single_uri([prediction_results])
+    job_name = f"extract-{model_display_name}-serving-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    
+    vertex_ai.init(project=project, location=region)
 
     logging.info("Submitting Vertex AI batch prediction job...")
-
-    vertex_ai.init(project=project, location=region)
-    
     batch_prediction_job = vertex_ai.BatchPredictionJob.create(
-        job_display_name=job_display_name,
+        job_display_name=job_name,
         model_name=model_display_name,
         gcs_source=gcs_source_pattern,
         gcs_destination_prefix=gcs_destination_prefix,
@@ -185,8 +184,8 @@ def vertex_batch_prediction(
         sync=True,
         **job_resources,
     )
-    
     logging.info("Batch prediction job completed.")
+    
     prediction_results.set_string_custom_property(
         "batch_prediction_job", batch_prediction_job.gca_resource.name
     )

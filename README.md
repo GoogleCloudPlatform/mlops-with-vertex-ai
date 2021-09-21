@@ -57,7 +57,7 @@ The [03-training-formalization](03-training-formalization.ipynb) notebook covers
 
 ## Training Operationalization
 
-The [04-pipeline-deployment](04-pipeline-deployment.ipynb) notebook covers executing the CI/CD steps for the training pipeline deployment using [Cloud Build](https://cloud.google.com/build/docs/overview). The CI/CD routine is defined in the [pipeline-deployment.yaml](pipeline-deployment.yaml) file, and consists of the following steps:
+The [04-pipeline-deployment](04-pipeline-deployment.ipynb) notebook covers executing the CI/CD steps for the training pipeline deployment using [Cloud Build](https://cloud.google.com/build/docs/overview). The CI/CD routine is defined in the [pipeline-deployment.yaml](build/pipeline-deployment.yaml) file, and consists of the following steps:
 
 1. Clone the repository to the build environment.
 2. Run unit tests.
@@ -86,14 +86,14 @@ The end-to-end TFX training pipeline implementation is in the [src/pipelines](sr
 3. Validate the raw data using `StatisticsGen` and `ExampleValidator` component.
 4. Process the data using on `Dataflow` `Transform` component.
 5. Train a custom model with `Vertex AI` using `Trainer` component.
-6. Evaluat and validate the custom model using `ModelEvaluator` component.
+6. Evaluate and validate the custom model using `ModelEvaluator` component.
 7. Save the blessed to model registry location in `Cloud Storage` using `Pusher` component.
 8. Upload the model to `Vertex AI` using `vertex_model_pusher` custom python component.
 
 
 ## Model Deployment
 
-The [06-model-deployment](06-model-deployment.ipynb) notebook covers executing the CI/CD steps for the model deployment using [Cloud Build](https://cloud.google.com/build/docs/overview). The CI/CD rountine is defined in [build/model-deployment.yaml](build/model-deployment.yaml)
+The [06-model-deployment](06-model-deployment.ipynb) notebook covers executing the CI/CD steps for the model deployment using [Cloud Build](https://cloud.google.com/build/docs/overview). The CI/CD routine is defined in [build/model-deployment.yaml](build/model-deployment.yaml)
 file, and consists of the following steps:
 
 2. Test model interface.
@@ -112,8 +112,8 @@ The [07-prediction-serving](07-prediction-serving.ipynb) notebook covers:
 
 ## Model Monitoring
 
-After a model is deployed in for prediciton serving, continuous monitoring is set up to ensure that the model continue to perform as expected.
-The [08-model-monitoring](08-model-monitoring.ipynb) notebook covers configuring [Vertex AI Model Monitoring](https://cloud.google.com/vertex-ai/docs/model-monitoring/overview?hl=nn) for skew and dirft detection:
+After a model is deployed in for prediction serving, continuous monitoring is set up to ensure that the model continue to perform as expected.
+The [08-model-monitoring](08-model-monitoring.ipynb) notebook covers configuring [Vertex AI Model Monitoring](https://cloud.google.com/vertex-ai/docs/model-monitoring/overview?hl=nn) for skew and drift detection:
 
 1. Set skew and drift threshold.
 2. Create a monitoring job for all the models under and endpoint.

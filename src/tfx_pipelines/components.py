@@ -79,9 +79,10 @@ def vertex_model_uploader(
     model_display_name: Parameter[str],
     pushed_model_location: Parameter[str],
     serving_image_uri: Parameter[str],
-    explanation_config: Parameter[str],
     model_blessing: InputArtifact[ModelBlessing],
     uploaded_model: OutputArtifact[UploadedModel],
+    explanation_config: Parameter[str]="",
+    labels: Parameter[str]="",
 ):
 
     vertex_ai.init(project=project, location=region)
@@ -99,6 +100,7 @@ def vertex_model_uploader(
     logging.info(f"Model registry location: {pushed_model_dir}")
 
     try:
+        explanation_config = json.loads(explanation_config)
         explanation_metadata = vertex_ai.explain.ExplanationMetadata(
             inputs=explanation_config["inputs"],
             outputs=explanation_config["outputs"],
@@ -109,6 +111,11 @@ def vertex_model_uploader(
     except:
         explanation_metadata = None
         explanation_parameters = None
+        
+    try:
+        labels = json.loads(labels)
+    except:
+        labels = None
 
     vertex_model = vertex_ai.Model.upload(
         display_name=model_display_name,
@@ -118,6 +125,7 @@ def vertex_model_uploader(
         instance_schema_uri=None,
         explanation_metadata=explanation_metadata,
         explanation_parameters=explanation_parameters,
+        labels=labels
     )
 
     model_uri = vertex_model.gca_resource.name

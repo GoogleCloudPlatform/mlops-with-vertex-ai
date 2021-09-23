@@ -248,9 +248,17 @@ def create_pipeline(
         model_blessing=evaluator.outputs["blessing"],
         push_destination=push_destination,
     ).with_id("ModelPusher")
+    
+
 
     # Upload custom trained model to Vertex AI.
+    labels = {
+        'dataset_name': config.DATASET_DISPLAY_NAME,
+        'pipeline_name': config.PIPELINE_NAME
+    }
+    labels = json.dumps(labels)
     explanation_config = json.dumps(features.generate_explanation_config())
+    
     vertex_model_uploader = custom_components.vertex_model_uploader(
         project=config.PROJECT,
         region=config.REGION,
@@ -259,6 +267,7 @@ def create_pipeline(
         serving_image_uri=config.SERVING_IMAGE_URI,
         model_blessing=evaluator.outputs["blessing"],
         explanation_config=explanation_config,
+        labels=labels
     ).with_id("VertexUploader")
 
     pipeline_components = [

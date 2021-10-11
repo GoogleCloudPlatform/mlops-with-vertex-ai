@@ -9,7 +9,7 @@ This example implements the end-to-end [MLOps process](https://services.google.c
 
 ## Getting started
 
-1. [Setting up MLOps environment](provision) on Google Cloud.
+1. [Setup your MLOps environment](provision) on Google Cloud.
 2. Start your AI Notebook instance.
 3. Open the JupyterLab then open a new Terminal
 4. Clone the repository to your AI Notebook instance:

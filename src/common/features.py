@@ -87,6 +87,7 @@ def generate_explanation_config():
         else:
             explanation_config["inputs"][feature_name] = {
                 "input_tensor_name": feature_name,
+                "encoding": 'IDENTITY',
                 "modality": "categorical",
             }
 

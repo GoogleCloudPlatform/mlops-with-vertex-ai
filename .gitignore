@@ -137,3 +137,4 @@ mlpipeline-ui-metadata.json
 *.sqllite
 model.png
 *-pipeline.json
+*.DS_Store

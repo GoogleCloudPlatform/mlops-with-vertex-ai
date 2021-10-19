@@ -249,12 +249,11 @@ def create_pipeline(
         push_destination=push_destination,
     ).with_id("ModelPusher")
     
-
-
     # Upload custom trained model to Vertex AI.
     labels = {
-        'dataset_name': config.DATASET_DISPLAY_NAME,
-        'pipeline_name': config.PIPELINE_NAME
+        "dataset_name": config.DATASET_DISPLAY_NAME,
+        "pipeline_name": config.PIPELINE_NAME,
+        "pipeline_root": pipeline_root
     }
     labels = json.dumps(labels)
     explanation_config = json.dumps(features.generate_explanation_config())

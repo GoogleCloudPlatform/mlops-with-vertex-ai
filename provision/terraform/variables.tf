@@ -1,4 +1,3 @@
-
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +65,7 @@ variable "boot_disk_size" {
 variable "image_family" {
     description = "A Deep Learning image family for the Notebook instance"
     type        = string
-    default     = "base-cpu"
+    default     = "common-cpu"
 }
 
 variable "gpu_type" {
@@ -84,7 +83,7 @@ variable "gpu_count" {
 variable "install_gpu_driver" {
     description = "Whether to install GPU driver"
     type        = bool
-    default     = false
+    default     = true
 }
 
 variable "force_destroy" {

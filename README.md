@@ -48,7 +48,7 @@ We experiment with creating a [Custom Model](https://cloud.google.com/ai-platfor
 3. Training the `Keras` model with `Vertex AI` using a [pre-built container](https://cloud.google.com/ai-platform-unified/docs/training/pre-built-containers).
 4. Upload the exported model from `Cloud Storage` to `Vertex AI`.
 5. Extract and visualize experiment parameters from [Vertex AI Metadata](https://cloud.google.com/vertex-ai/docs/ml-metadata/introduction).
-6. Use Vertex AI for [hyperparameter tuning](https://cloud.google.com/vertex-ai/docs/training/hyperparameter-tuning-overview).
+6. Use `Vertex AI` for [hyperparameter tuning](https://cloud.google.com/vertex-ai/docs/training/hyperparameter-tuning-overview).
 
 We use [Vertex TensorBoard](https://cloud.google.com/vertex-ai/docs/experiments/tensorboard-overview) 
 and [Vertex ML Metadata](https://cloud.google.com/vertex-ai/docs/ml-metadata/introduction) to  track, visualize, and compare ML experiments.

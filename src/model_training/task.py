@@ -22,12 +22,15 @@ from tensorflow.python.client import device_lib
 import argparse
 
 from google.cloud import aiplatform as vertex_ai
+import hypertune
 
 from src.model_training import defaults, trainer, exporter
+
 
 dirname = os.path.dirname(__file__)
 dirname = dirname.replace("/model_training", "")
 RAW_SCHEMA_LOCATION = os.path.join(dirname, "raw_schema/schema.pbtxt")
+HYPERTUNE_METRIC_NAME = 'ACCURACY'
 
 
 def get_args():
@@ -61,11 +64,8 @@ def get_args():
     )
 
     parser.add_argument("--learning-rate", default=0.001, type=float)
-
     parser.add_argument("--batch-size", default=512, type=float)
-
     parser.add_argument("--hidden-units", default="64,32", type=str)
-
     parser.add_argument("--num-epochs", default=10, type=int)
 
     parser.add_argument("--project", type=str)
@@ -117,7 +117,19 @@ def main():
         tft_output_dir=args.tft_output_dir,
         hyperparams=hyperparams,
     )
+    
+    
+    # Report val_accuracy to Vertex hypertuner.
+    logging.info(f'Reporting metric {HYPERTUNE_METRIC_NAME}={val_accuracy} to Vertex hypertuner...')
+    hpt = hypertune.HyperTune()
+    hpt.report_hyperparameter_tuning_metric(
+        hyperparameter_metric_tag=HYPERTUNE_METRIC_NAME,
+        metric_value=val_accuracy,
+        global_step=args.num_epochs * args.batch_size
+    )
 
+    # Log metrics in Vertex Experiments.
+    logging.info(f'Logging metrics to Vertex Experiments...')
     if args.experiment_name:
         vertex_ai.log_metrics({"val_loss": val_loss, "val_accuracy": val_accuracy})
 

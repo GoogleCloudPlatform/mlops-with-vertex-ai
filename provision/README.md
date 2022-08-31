@@ -30,7 +30,7 @@ You can customize your configuration using the following variables:
 |gpu_type|No|null|GPU type of the Notebook instance. By default, the Notebook instance will be provisioned without a GPU|
 |gpu_count|No|null|GPU count of the Notebook instance|
 |install_gpu_driver|No|false|Whether to install a GPU driver|
-|region|No|Set to subnet_region.|GCP region for the GCS bucket and Artifact Registry. It is recommended that the same region is used for all: the bucket, the registry and the Notebook instance. If not provided the `egion` will be set to `subnet_region`.|
+|region|No|Set to subnet_region.|GCP region for the GCS bucket and Artifact Registry. It is recommended that the same region is used for all: the bucket, the registry and the Notebook instance. If not provided the `region` will be set to `subnet_region`.|
 |force_destroy|No|false|Whether to force the removal of the bucket on terraform destroy. **Note that by default the bucket will not be destroyed**.|
 
 

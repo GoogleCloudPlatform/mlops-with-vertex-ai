@@ -40,7 +40,7 @@ To provision the environment:
 
 2. Download the installation scripts
     ```
-    SRC_REPO=https://github.com/GoogleCloudPlatform/mlops-with-vertex-ai.git
+    SRC_REPO=https://github.com/catwang42/mlops-with-vertex-ai.git
     LOCAL_DIR=provision
     kpt pkg get $SRC_REPO/provision@main $LOCAL_DIR
     cd $LOCAL_DIR/terraform

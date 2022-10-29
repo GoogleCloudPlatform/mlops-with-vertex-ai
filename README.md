@@ -14,7 +14,7 @@ This example implements the end-to-end [MLOps process](https://services.google.c
 3. Open the JupyterLab then open a new Terminal
 4. Clone the repository to your AI Notebook instance:
     ```
-    git clone https://github.com/GoogleCloudPlatform/mlops-with-vertex-ai.git
+    git clone [https://github.com/GoogleCloudPlatform/mlops-with-vertex-ai.git](https://github.com/catwang42/mlops-with-vertex-ai.git)
     cd mlops-with-vertex-ai
     ```
 5. Install the required Python packages:

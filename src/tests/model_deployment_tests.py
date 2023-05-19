@@ -11,94 +11,141 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test utilities for generating BigQuery data querying scirpts."""
+"""Test an uploaded model to Vertex AI."""
 
-import sys
 import os
 import logging
-from google.cloud import bigquery
+import tensorflow as tf
 
-from src.common import datasource_utils
+test_instance = {
+    "dropoff_grid": ["POINT(-87.6 41.9)"],
+    "euclidean": [2064.2696],
+    "loc_cross": [""],
+    "payment_type": ["Credit Card"],
+    "pickup_grid": ["POINT(-87.6 41.9)"],
+    "trip_miles": [1.37],
+    "trip_day": [12],
+    "trip_hour": [16],
+    "trip_month": [2],
+    "trip_day_of_week": [4],
+    "trip_seconds": [555],
+}
 
-root = logging.getLogger()
-root.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-root.addHandler(handler)
+SERVING_DEFAULT_SIGNATURE_NAME = "serving_default"
 
-LIMIT = 100
-
-TARGET_COLUMN = "tip_bin"
-
-EXPECTED_TRAINING_COLUMNS = [
-    "trip_month",
-    "trip_day",
-    "trip_day_of_week",
-    "trip_hour",
-    "trip_seconds",
-    "trip_miles",
-    "payment_type",
-    "pickup_grid",
-    "dropoff_grid",
-    "euclidean",
-    "loc_cross",
-    "tip_bin",
-]
+from google.cloud import aiplatform as vertex_ai
 
 
-def test_training_query():
+def test_model_artifact():
+
+    feature_types = {
+        "dropoff_grid": tf.dtypes.string,
+        "euclidean": tf.dtypes.float32,
+        "loc_cross": tf.dtypes.string,
+        "payment_type": tf.dtypes.string,
+        "pickup_grid": tf.dtypes.string,
+        "trip_miles": tf.dtypes.float32,
+        "trip_day": tf.dtypes.int64,
+        "trip_hour": tf.dtypes.int64,
+        "trip_month": tf.dtypes.int64,
+        "trip_day_of_week": tf.dtypes.int64,
+        "trip_seconds": tf.dtypes.int64,
+    }
+
+#     new_test_instance = dict()
+#     for key in test_instance:
+#         new_test_instance[key] = tf.constant(
+#             [test_instance[key]], dtype=feature_types[key]
+#         )
+
+#     print(new_test_instance)
 
 #     project = os.getenv("PROJECT")
-#     location = os.getenv("BQ_LOCATION")
-#     bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-#     bq_table_name = os.getenv("BQ_TABLE_NAME")
+#     region = os.getenv("REGION")
+#     model_display_name = os.getenv("MODEL_DISPLAY_NAME")
 
 #     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
+#     assert region, "Environment variable REGION is None!"
+#     assert model_display_name, "Environment variable MODEL_DISPLAY_NAME is None!"
 
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
+#     vertex_ai.init(project=project, location=region,)
 
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use="UNASSIGNED",
-#         limit=LIMIT,
+#     models = vertex_ai.Model.list(
+#         filter=f'display_name={model_display_name}',
+#         order_by="update_time"
 #     )
 
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     assert columns == set(EXPECTED_TRAINING_COLUMNS)
-#     assert df.shape == (LIMIT, 12)
+#     assert (
+#         models
+#     ), f"No model with display name {model_display_name} exists!"
+
+#     model = models[-1]
+#     artifact_uri = model.gca_resource.artifact_uri
+#     logging.info(f"Model artifact uri:{artifact_uri}")
+#     assert tf.io.gfile.exists(
+#         artifact_uri
+#     ), f"Model artifact uri {artifact_uri} does not exist!"
+
+#     saved_model = tf.saved_model.load(artifact_uri)
+#     logging.info("Model loaded successfully.")
+
+#     assert (
+#         SERVING_DEFAULT_SIGNATURE_NAME in saved_model.signatures
+#     ), f"{SERVING_DEFAULT_SIGNATURE_NAME} not in model signatures!"
+
+#     prediction_fn = saved_model.signatures["serving_default"]
+#     predictions = prediction_fn(**new_test_instance)
+#     logging.info("Model produced predictions.")
+
+#     keys = ["classes", "scores"]
+#     for key in keys:
+#         assert key in predictions, f"{key} in prediction outputs!"
+
+#     assert predictions["classes"].shape == (
+#         1,
+#         2,
+#     ), f"Invalid output classes shape: {predictions['classes'].shape}!"
+#     assert predictions["scores"].shape == (
+#         1,
+#         2,
+#     ), f"Invalid output scores shape: {predictions['scores'].shape}!"
+#     logging.info(f"Prediction output: {predictions}")
 
 
-def test_serving_query():
+def test_model_endpoint():
 
     project = os.getenv("PROJECT")
-    location = os.getenv("BQ_LOCATION")
-    bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-    bq_table_name = os.getenv("BQ_TABLE_NAME")
+    region = os.getenv("REGION")
+    model_display_name = os.getenv("MODEL_DISPLAY_NAME")
+    endpoint_display_name = os.getenv("ENDPOINT_DISPLAY_NAME")
 
 #     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
+#     assert region, "Environment variable REGION is None!"
+#     assert model_display_name, "Environment variable MODEL_DISPLAY_NAME is None!"
+#     assert endpoint_display_name, "Environment variable ENDPOINT_DISPLAY_NAME is None!"
 
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
-
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use=None,
-#         limit=LIMIT,
+#     endpoints = vertex_ai.Endpoint.list(
+#         filter=f'display_name={endpoint_display_name}',
+#         order_by="update_time"
 #     )
+#     assert (
+#         endpoints
+#     ), f"Endpoint with display name {endpoint_display_name} does not exist! in region {region}"
 
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     expected_serving_columns = EXPECTED_TRAINING_COLUMNS
-#     expected_serving_columns.remove(TARGET_COLUMN)
-#     assert columns == set(expected_serving_columns)
-#     assert df.shape == (LIMIT, 11)
+#     endpoint = endpoints[-1]
+#     logging.info(f"Calling endpoint: {endpoint}.")
+
+#     prediction = endpoint.predict([test_instance]).predictions[0]
+
+#     keys = ["classes", "scores"]
+#     for key in keys:
+#         assert key in prediction, f"{key} in prediction outputs!"
+
+#     assert (
+#         len(prediction["classes"]) == 2
+#     ), f"Invalid number of output classes: {len(prediction['classes'])}!"
+#     assert (
+#         len(prediction["scores"]) == 2
+#     ), f"Invalid number output scores: {len(prediction['scores'])}!"
+
+#     logging.info(f"Prediction output: {prediction}")

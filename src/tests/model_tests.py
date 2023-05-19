@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test utilities for generating BigQuery data querying scirpts."""
+"""Test model functions."""
 
 import sys
-import os
 import logging
-from google.cloud import bigquery
+import tensorflow as tf
 
-from src.common import datasource_utils
+from src.common import features
+from src.model_training import model, defaults
 
 root = logging.getLogger()
 root.setLevel(logging.INFO)
@@ -26,79 +26,43 @@ handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 root.addHandler(handler)
 
-LIMIT = 100
-
-TARGET_COLUMN = "tip_bin"
-
-EXPECTED_TRAINING_COLUMNS = [
-    "trip_month",
-    "trip_day",
-    "trip_day_of_week",
-    "trip_hour",
-    "trip_seconds",
-    "trip_miles",
-    "payment_type",
-    "pickup_grid",
-    "dropoff_grid",
-    "euclidean",
-    "loc_cross",
-    "tip_bin",
+EXPECTED_HYPERPARAMS_KEYS = [
+    "hidden_units",
+    "learning_rate",
+    "batch_size",
+    "num_epochs",
 ]
 
 
-def test_training_query():
+def test_hyperparams_defaults():
+    hyperparams = {"hidden_units": [64, 32]}
 
-#     project = os.getenv("PROJECT")
-#     location = os.getenv("BQ_LOCATION")
-#     bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-#     bq_table_name = os.getenv("BQ_TABLE_NAME")
-
-#     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
-
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
-
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use="UNASSIGNED",
-#         limit=LIMIT,
-#     )
-
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     assert columns == set(EXPECTED_TRAINING_COLUMNS)
-#     assert df.shape == (LIMIT, 12)
+    hyperparams = defaults.update_hyperparams(hyperparams)
+    assert set(hyperparams.keys()) == set(EXPECTED_HYPERPARAMS_KEYS)
 
 
-def test_serving_query():
+def test_create_binary_classifier():
 
-    project = os.getenv("PROJECT")
-    location = os.getenv("BQ_LOCATION")
-    bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-    bq_table_name = os.getenv("BQ_TABLE_NAME")
+    hyperparams = hyperparams = defaults.update_hyperparams(dict())
 
-#     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
+    model_inputs = {
+        "dropoff_grid_xf": tf.convert_to_tensor([0, 0, 0]),
+        "euclidean_xf": tf.convert_to_tensor([-0.9066112, -0.9066112, -0.9066112]),
+        "loc_cross_xf": tf.convert_to_tensor([0, 0, 0]),
+        "payment_type_xf": tf.convert_to_tensor([1, 0, 0]),
+        "pickup_grid_xf": tf.convert_to_tensor([0, 0, 0]),
+        "trip_day_of_week_xf": tf.convert_to_tensor([5, 4, 4]),
+        "trip_day_xf": tf.convert_to_tensor([26, 24, 1]),
+        "trip_hour_xf": tf.convert_to_tensor([0, 4, 2]),
+        "trip_miles_xf": tf.convert_to_tensor([5.9717827, -0.7121308, -0.7601589]),
+        "trip_month_xf": tf.convert_to_tensor([4, 3, 4]),
+        "trip_seconds_xf": tf.convert_to_tensor([4.9029775, -0.34146854, -0.34479955]),
+    }
 
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
-
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use=None,
-#         limit=LIMIT,
-#     )
-
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     expected_serving_columns = EXPECTED_TRAINING_COLUMNS
-#     expected_serving_columns.remove(TARGET_COLUMN)
-#     assert columns == set(expected_serving_columns)
-#     assert df.shape == (LIMIT, 11)
+    # feature_vocab_sizes = {
+    #     feature_name: 100 for feature_name in features.categorical_feature_names()
+    # }
+    # classifier = model._create_binary_classifier(feature_vocab_sizes, hyperparams)
+    # model_outputs = classifier(model_inputs)  # .numpy()
+    # assert model_outputs.shape == (3, 1)
+    # assert model_outputs.dtype == "float32"

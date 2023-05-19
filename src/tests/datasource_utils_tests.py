@@ -47,58 +47,15 @@ EXPECTED_TRAINING_COLUMNS = [
 
 
 def test_training_query():
-
-#     project = os.getenv("PROJECT")
-#     location = os.getenv("BQ_LOCATION")
-#     bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-#     bq_table_name = os.getenv("BQ_TABLE_NAME")
-
-#     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
-
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
-
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use="UNASSIGNED",
-#         limit=LIMIT,
-#     )
-
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     assert columns == set(EXPECTED_TRAINING_COLUMNS)
-#     assert df.shape == (LIMIT, 12)
-
-
-def test_serving_query():
-
     project = os.getenv("PROJECT")
     location = os.getenv("BQ_LOCATION")
     bq_dataset_name = os.getenv("BQ_DATASET_NAME")
     bq_table_name = os.getenv("BQ_TABLE_NAME")
 
-#     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
 
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
+def test_serving_query():
+    project = os.getenv("PROJECT")
+    location = os.getenv("BQ_LOCATION")
+    bq_dataset_name = os.getenv("BQ_DATASET_NAME")
+    bq_table_name = os.getenv("BQ_TABLE_NAME")
 
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use=None,
-#         limit=LIMIT,
-#     )
-
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     expected_serving_columns = EXPECTED_TRAINING_COLUMNS
-#     expected_serving_columns.remove(TARGET_COLUMN)
-#     assert columns == set(expected_serving_columns)
-#     assert df.shape == (LIMIT, 11)

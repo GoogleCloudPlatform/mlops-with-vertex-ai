@@ -11,14 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test utilities for generating BigQuery data querying scirpts."""
+"""Test data processing."""
 
 import sys
 import os
 import logging
-from google.cloud import bigquery
+import tensorflow_transform as tft
+import tensorflow as tf
+from tensorflow.io import FixedLenFeature
 
-from src.common import datasource_utils
+from src.preprocessing import etl
+from src.comm import datasource_utils
 
 root = logging.getLogger()
 root.setLevel(logging.INFO)
@@ -26,79 +29,71 @@ handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 root.addHandler(handler)
 
+OUTPUT_DIR = "test_etl_output_dir"
+ML_USE = "UNASSIGNED"
 LIMIT = 100
 
-TARGET_COLUMN = "tip_bin"
-
-EXPECTED_TRAINING_COLUMNS = [
-    "trip_month",
-    "trip_day",
-    "trip_day_of_week",
-    "trip_hour",
-    "trip_seconds",
-    "trip_miles",
-    "payment_type",
-    "pickup_grid",
-    "dropoff_grid",
-    "euclidean",
-    "loc_cross",
-    "tip_bin",
-]
-
-
-def test_training_query():
-
-#     project = os.getenv("PROJECT")
-#     location = os.getenv("BQ_LOCATION")
-#     bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-#     bq_table_name = os.getenv("BQ_TABLE_NAME")
-
-#     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
-
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
-
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use="UNASSIGNED",
-#         limit=LIMIT,
-#     )
-
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     assert columns == set(EXPECTED_TRAINING_COLUMNS)
-#     assert df.shape == (LIMIT, 12)
+EXPECTED_FEATURE_SPEC = {
+    "dropoff_grid_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "euclidean_xf": FixedLenFeature(shape=[], dtype=tf.float32, default_value=None),
+    "loc_cross_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "payment_type_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "pickup_grid_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "tip_bin": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "trip_day_of_week_xf": FixedLenFeature(
+        shape=[], dtype=tf.int64, default_value=None
+    ),
+    "trip_day_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "trip_hour_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "trip_miles_xf": FixedLenFeature(shape=[], dtype=tf.float32, default_value=None),
+    "trip_month_xf": FixedLenFeature(shape=[], dtype=tf.int64, default_value=None),
+    "trip_seconds_xf": FixedLenFeature(shape=[], dtype=tf.float32, default_value=None),
+}
 
 
-def test_serving_query():
+def test_transform_pipeline():
 
     project = os.getenv("PROJECT")
-    location = os.getenv("BQ_LOCATION")
-    bq_dataset_name = os.getenv("BQ_DATASET_NAME")
-    bq_table_name = os.getenv("BQ_TABLE_NAME")
+    region = os.getenv("REGION")
+    bucket = os.getenv("BUCKET")
+    dataset_display_name = os.getenv("DATASET_DISPLAY_NAME")
 
 #     assert project, "Environment variable PROJECT is None!"
-#     assert location, "Environment variable BQ_LOCATION is None!"
-#     assert bq_dataset_name, "Environment variable BQ_DATASET_NAME is None!"
-#     assert bq_table_name, "Environment variable BQ_TABLE_NAME is None!"
+#     assert region, "Environment variable REGION is None!"
+#     assert bucket, "Environment variable BUCKET is None!"
+#     assert dataset_display_name, "Environment variable DATASET_DISPLAY_NAME is None!"
 
-#     logging.info(f"BigQuery Source: {project}.{bq_dataset_name}.{bq_table_name}")
+#     os.mkdir(OUTPUT_DIR)
 
-#     query = datasource_utils._get_source_query(
-#         bq_dataset_name=bq_dataset_name,
-#         bq_table_name=bq_table_name,
-#         ml_use=None,
+#     exported_data_dir = os.path.join(OUTPUT_DIR, "exported_data")
+#     transformed_data_dir = os.path.join(OUTPUT_DIR, "transformed_data")
+#     transform_artifacts_dir = os.path.join(OUTPUT_DIR, "transform_artifacts")
+#     temporary_dir = os.path.join(OUTPUT_DIR, "tmp")
+
+#     raw_data_query = datasource_utils.get_training_source_query(
+#         project=project,
+#         region=region,
+#         dataset_display_name=dataset_display_name,
+#         ml_use=ML_USE,
 #         limit=LIMIT,
 #     )
 
-#     bq_client = bigquery.Client(project=project, location=location)
-#     df = bq_client.query(query).to_dataframe()
-#     columns = set(df.columns)
-#     expected_serving_columns = EXPECTED_TRAINING_COLUMNS
-#     expected_serving_columns.remove(TARGET_COLUMN)
-#     assert columns == set(expected_serving_columns)
-#     assert df.shape == (LIMIT, 11)
+#     args = {
+#         "runner": "DirectRunner",
+#         "raw_data_query": raw_data_query,
+#         "write_raw_data": False,
+#         "exported_data_prefix": exported_data_dir,
+#         "transformed_data_prefix": transformed_data_dir,
+#         "transform_artefact_dir": transform_artifacts_dir,
+#         "temporary_dir": temporary_dir,
+#         "gcs_location": f"gs://{bucket}/bq_tmp",
+#         "project": project,
+#     }
+
+#     logging.info(f"Transform pipeline args: {args}")
+#     etl.run_transform_pipeline(args)
+#     logging.info(f"Transform pipeline finished.")
+
+#     tft_output = tft.TFTransformOutput(transform_artifacts_dir)
+#     transform_feature_spec = tft_output.transformed_feature_spec()
+#     assert transform_feature_spec == EXPECTED_FEATURE_SPEC
